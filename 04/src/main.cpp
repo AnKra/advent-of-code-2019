@@ -1,12 +1,40 @@
+#include <cmath>
 #include <iostream>
 #include <vector>
 
 #include "../../common.h"
 
-std::vector<int> Passwords(const int min, const int max) {
-  std::vector<int> passwords{};
+std::vector<int> passwords{};
 
-  std::vector<int> digits{};
+std::vector<int> digits{};
+
+// int input_min{231832};
+// int input_max{767346};
+
+int input_min{123};
+int input_max{777};
+
+void Password(int previous_digit, int power, int intermediate_sum) {
+  if (power >= 0) {
+    auto i_init = previous_digit;
+
+    if (passwords.size() == 0) {
+      i_init = digits[power];
+    }
+
+    for (int i = i_init; i <= 9; ++i) {
+      Password(i, power - 1, intermediate_sum + i * pow(10, power));
+    }
+  } else {
+    if (intermediate_sum > input_max) {
+      return;
+    }
+
+    passwords.push_back(intermediate_sum);
+  }
+}
+
+std::vector<int> Passwords(const int min, const int max) {
 
   int number = min;
   while (number) {
@@ -15,33 +43,17 @@ std::vector<int> Passwords(const int min, const int max) {
     digits.push_back(digit);
   }
 
-
-
-  int j_init = digits[1];
-  int i_init = digits[0];
-  for (int j = j_init; j <= 9; ++j) {
-    for (int i = i_init; i <= 9; ++i) {
-      passwords.emplace_back(i + j * 10 + 1 * 100);
-    }
-    i_init = j + 1;
-  }
-  j_init = 0;
-
-  for (const auto &password : passwords) {
-    std::cout << password << std::endl;
-  }
+  Password(digits.back(), digits.size() - 1, 0);
 
   return passwords;
 }
 
 int main() {
-  // int input_min{231832};
-  // int input_max{767346};
+  Passwords(input_min, input_max);
 
-  int input_min{123};
-  int input_max{1000};
-
-  auto passwords = Passwords(input_min, input_max);
+  for (const auto &password : passwords) {
+    std::cout << password << std::endl;
+  }
 
   // part 1
   { std::cout << "part 1: " << passwords.size() << std::endl; }
