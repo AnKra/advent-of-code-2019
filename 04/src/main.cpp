@@ -6,20 +6,29 @@
 
 std::vector<int> passwords{};
 
-std::vector<int> digits{};
+std::vector<int> input_min_digits{};
 
-// int input_min{231832};
-// int input_max{767346};
+int input_min{231832};
+int input_max{767346};
 
-int input_min{123};
-int input_max{777};
+bool HasConsicutiveDigits(int number) {
+  while (number) {
+    auto last_two_digits = number % 100;
+    if (last_two_digits % 11 == 0) {
+      return true;
+    }
+    number /= 10;
+  }
+
+  return false;
+}
 
 void Password(int previous_digit, int power, int intermediate_sum) {
   if (power >= 0) {
     auto i_init = previous_digit;
 
     if (passwords.size() == 0) {
-      i_init = digits[power];
+      i_init = input_min_digits[power];
     }
 
     for (int i = i_init; i <= 9; ++i) {
@@ -30,26 +39,42 @@ void Password(int previous_digit, int power, int intermediate_sum) {
       return;
     }
 
-    passwords.push_back(intermediate_sum);
+    if (HasConsicutiveDigits(intermediate_sum)) {
+      passwords.push_back(intermediate_sum);
+    }
   }
 }
 
-std::vector<int> Passwords(const int min, const int max) {
+std::vector<int> Digits(int number) {
+  std::vector<int> digits;
 
-  int number = min;
   while (number) {
     auto digit = number % 10;
     number /= 10;
     digits.push_back(digit);
   }
 
-  Password(digits.back(), digits.size() - 1, 0);
+  return digits;
+}
 
-  return passwords;
+std::vector<int> FirstValidNumber(std::vector<int> digits) {
+  int max_digit = digits.back();
+  bool overwrite = false;
+
+  for (int i = digits.size() - 1; i >= 0; --i) {
+    if (digits[i] < max_digit || overwrite) {
+      digits[i] = max_digit;
+      overwrite = true;
+    } else if (digits[i] > max_digit) {
+      max_digit = digits[i];
+    }
+  }
+  return digits;
 }
 
 int main() {
-  Passwords(input_min, input_max);
+  input_min_digits = FirstValidNumber(Digits(input_min));
+  Password(input_min_digits.back(), input_min_digits.size() - 1, 0);
 
   for (const auto &password : passwords) {
     std::cout << password << std::endl;
