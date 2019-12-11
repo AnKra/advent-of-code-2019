@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # generate executable
-add_executable(${PROJECT_NAME} 
+add_executable (${PROJECT_NAME} 
     src/main.cpp 
+)
+
+target_include_directories (${PROJECT_NAME}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../common/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

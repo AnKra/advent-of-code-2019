@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include "../../common.h"
+#include <common/common.h>
 
 struct Point {
   int x;

@@ -5,7 +5,7 @@
 #include <numeric>
 #include <vector>
 
-#include "../../common.h"
+#include <common/common.h>
 
 int main() {
   auto input_values = GetVectorFromFile<int>("../input/input.txt");
