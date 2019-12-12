@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(day05)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+# generate executable
+add_executable(${PROJECT_NAME} 
+    src/main.cpp 
+)
+
+target_include_directories (${PROJECT_NAME}
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../common/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../02/include
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
