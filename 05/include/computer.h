@@ -44,6 +44,38 @@ protected:
       std::cout << (Get(instruction_ptr + 1, parameter_modes[1])) << std::endl;
       instruction_ptr += 2;
       break;
+    case 5:
+      if (Get(instruction_ptr + 1, parameter_modes[1]) != 0) {
+        instruction_ptr = Get(instruction_ptr + 2, parameter_modes[2]);
+      } else {
+        instruction_ptr += 3;
+      }
+      break;
+    case 6:
+      if (Get(instruction_ptr + 1, parameter_modes[1]) == 0) {
+        instruction_ptr = Get(instruction_ptr + 2, parameter_modes[2]);
+      } else {
+        instruction_ptr += 3;
+      }
+      break;
+    case 7:
+      if (Get(instruction_ptr + 1, parameter_modes[1]) <
+          Get(instruction_ptr + 2, parameter_modes[2])) {
+        Set(Get(instruction_ptr + 3, true), 1);
+      } else {
+        Set(Get(instruction_ptr + 3, true), 0);
+      }
+      instruction_ptr += 4;
+      break;
+    case 8:
+      if (Get(instruction_ptr + 1, parameter_modes[1]) ==
+          Get(instruction_ptr + 2, parameter_modes[2])) {
+        Set(Get(instruction_ptr + 3, true), 1);
+      } else {
+        Set(Get(instruction_ptr + 3, true), 0);
+      }
+      instruction_ptr += 4;
+      break;
     default:
       return false;
     }

@@ -16,6 +16,11 @@ int main() {
   }
 
   // part 2
+  {
+    SuperComputer computer(memory, 5);
+    std::cout << "part 5: " << std::endl;
+    computer.Run();
+  }
 
   return EXIT_SUCCESS;
 }
