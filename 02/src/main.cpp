@@ -6,7 +6,7 @@
 #include "day02/computer.h"
 
 int main() {
-  auto memory = GetVectorFromFile<Register>("../input/input.txt");
+  auto memory = CreateMemory("../input/input.txt");
 
   // part 1
   {
