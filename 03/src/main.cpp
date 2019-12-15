@@ -1,5 +1,6 @@
 #include <cmath>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
@@ -19,55 +20,55 @@ enum class Direction { UNKNOWN, VERTICAL, HORIZONTAL };
 
 struct Node {
   Point point = {0, 0};
-  Node *next_node = NULL;
+  std::unique_ptr<Node> next_node = {};
   Direction direction_from_prev_node = Direction::UNKNOWN;
   int distance_from_prev_node = 0;
   int distance_from_origin = 0;
 
-  bool DirectionIs(Direction direction) {
+  bool DirectionIs(const Direction direction) const {
     return this->next_node->direction_from_prev_node == direction;
   }
 };
 
 class Intersection {
 public:
-  Intersection(Node *horizontal_segment, Node *vertical_segment) {
+  Intersection(const Node &horizontal_segment, const Node &vertical_segment) {
 
-    point_.x = vertical_segment->point.x;
-    point_.y = horizontal_segment->point.y;
+    point_.x = vertical_segment.point.x;
+    point_.y = horizontal_segment.point.y;
 
-    combined_steps_from_origin_ = horizontal_segment->distance_from_origin +
-                                  Distance(point_, horizontal_segment->point) +
-                                  vertical_segment->distance_from_origin +
-                                  Distance(point_, vertical_segment->point);
+    combined_steps_from_origin_ = horizontal_segment.distance_from_origin +
+                                  Distance(point_, horizontal_segment.point) +
+                                  vertical_segment.distance_from_origin +
+                                  Distance(point_, vertical_segment.point);
   }
 
   virtual ~Intersection(){};
 
-  Point GetPoint() { return point_; }
+  Point GetPoint() const { return point_; }
 
-  int CombinedStepsFromOrigin() { return combined_steps_from_origin_; }
+  int CombinedStepsFromOrigin() const { return combined_steps_from_origin_; }
 
 private:
   Point point_;
   int combined_steps_from_origin_;
 };
 
-Node *Wire(std::string line) {
+std::unique_ptr<Node> Wire(std::string line) {
 
-  Node *origin = new Node{};
+  std::unique_ptr<Node> origin = std::make_unique<Node>();
 
   // extract direction and distance
   {
-    Node *current_node = origin;
+    Node *current_node{origin.get()};
 
     std::stringstream ss(line);
     std::string value_string;
     while (std::getline(ss, value_string, ',')) {
       if (value_string.size() > 0) {
 
-        current_node->next_node = new Node{};
-        current_node = current_node->next_node;
+        current_node->next_node = std::make_unique<Node>();
+        current_node = current_node->next_node.get();
 
         auto direction = value_string[0];
         switch (direction) {
@@ -99,7 +100,7 @@ Node *Wire(std::string line) {
   }
 
   {
-    Node *current_node = origin;
+    Node *current_node{origin.get()};
     while (current_node->next_node) {
 
       // calculate coordinates
@@ -125,29 +126,31 @@ Node *Wire(std::string line) {
           current_node->distance_from_origin +
           std::abs(current_node->next_node->distance_from_prev_node);
 
-      current_node = current_node->next_node;
+      current_node = current_node->next_node.get();
     }
   }
 
-  return origin;
+  return std::move(origin);
 }
 
-void PrintWireSegment(Node *origin) {
-  std::cout << origin->point.x << " / " << origin->point.y << " <--> "
-            << origin->next_node->point.x << " / " << origin->next_node->point.y
+void PrintWireSegment(Node origin) {
+  std::cout << origin.point.x << " / " << origin.point.y << " <--> "
+            << origin.next_node->point.x << " / " << origin.next_node->point.y
             << std::endl;
 }
 
-void PrintWire(Node *origin) {
-  Node *current_node = origin;
+void PrintWire(Node origin) {
+  Node *current_node = &origin;
   while (current_node->next_node) {
     std::cout << "wire1 " << current_node->point.x << " / "
               << current_node->point.y << std::endl;
-    current_node = current_node->next_node;
+    current_node = current_node->next_node.get();
   }
 }
 
-Node *GetNodeByDirection(Direction direction, Node *node1, Node *node2) {
+const Node *const GetNodeByDirection(const Direction direction,
+                                     const Node *const node1,
+                                     const Node *const node2) {
   if (node1->DirectionIs(direction))
     return node1;
   if (node2->DirectionIs(direction))
@@ -159,43 +162,43 @@ bool IsInbetween(int a, int b, int c) {
   return (a < b && b < c) || (a > b && b > c);
 }
 
-bool XCoordinatesIntersect(Node *segment, Point point) {
-  return IsInbetween(segment->point.x, point.x, segment->next_node->point.x);
+bool XCoordinatesIntersect(const Node &segment, const Point &point) {
+  return IsInbetween(segment.point.x, point.x, segment.next_node->point.x);
 }
 
-bool YCoordinatesIntersect(Node *segment, Point point) {
-  return IsInbetween(segment->point.y, point.y, segment->next_node->point.y);
+bool YCoordinatesIntersect(const Node &segment, const Point &point) {
+  return IsInbetween(segment.point.y, point.y, segment.next_node->point.y);
 }
 
-bool Intersects(Node *horizontal_segment, Node *vertical_segment) {
-  return (XCoordinatesIntersect(horizontal_segment, vertical_segment->point) &&
-          YCoordinatesIntersect(vertical_segment, horizontal_segment->point));
+bool Intersects(const Node &horizontal_segment, const Node &vertical_segment) {
+  return (XCoordinatesIntersect(horizontal_segment, vertical_segment.point) &&
+          YCoordinatesIntersect(vertical_segment, horizontal_segment.point));
 }
 
-std::vector<Intersection> FindIntersections(Node *wire1_origin,
-                                            Node *wire2_origin) {
+std::vector<Intersection> FindIntersections(const Node &wire1_origin,
+                                            const Node &wire2_origin) {
   std::vector<Intersection> intersections;
 
-  Node *current_node1 = wire1_origin;
+  const Node *current_node1 = &wire1_origin;
   while (current_node1->next_node) {
 
-    Node *current_node2 = wire2_origin;
+    const Node *current_node2 = &wire2_origin;
     while (current_node2->next_node) {
 
-      auto horizontal_segment = 
-          GetNodeByDirection(Direction::HORIZONTAL, current_node1, current_node2);
+      auto horizontal_segment = GetNodeByDirection(
+          Direction::HORIZONTAL, current_node1, current_node2);
       auto vertical_segment =
           GetNodeByDirection(Direction::VERTICAL, current_node1, current_node2);
 
       if (horizontal_segment && vertical_segment &&
-          Intersects(horizontal_segment, vertical_segment)) {
-        intersections.emplace_back(horizontal_segment, vertical_segment);
+          Intersects(*horizontal_segment, *vertical_segment)) {
+        intersections.emplace_back(*horizontal_segment, *vertical_segment);
       }
 
-      current_node2 = current_node2->next_node;
+      current_node2 = current_node2->next_node.get();
     }
 
-    current_node1 = current_node1->next_node;
+    current_node1 = current_node1->next_node.get();
   }
 
   return intersections;
@@ -232,7 +235,10 @@ int main() {
   std::getline(input_file, line);
   auto wire2 = Wire(line);
 
-  auto intersections = FindIntersections(wire1, wire2);
+  if (!wire1 || !wire2) {
+    throw std::runtime_error("at least one wire is invalid");
+  }
+  auto intersections = FindIntersections(*wire1, *wire2);
 
   if (intersections.size() == 0) {
     throw std::runtime_error("no intersections");
