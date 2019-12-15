@@ -1,8 +1,6 @@
 #include <iostream>
 #include <vector>
 
-#include <common/common.h>
-
 #include "computer.h"
 
 int main() {
@@ -18,7 +16,7 @@ int main() {
   // part 2
   {
     SuperComputer computer(memory, 5);
-    std::cout << "part 5: " << std::endl;
+    std::cout << "part 1: " << std::endl;
     computer.Run();
   }
 

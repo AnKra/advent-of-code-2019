@@ -1,8 +1,8 @@
 #ifndef DAY_02_INCLUDE_SQALRE_H_
 #define DAY_02_INCLUDE_SQALRE_H_
 
+#include <fstream>
 #include <vector>
-
 
 static std::vector<int> CreateMemory(std::string file_name) {
   std::vector<int> memory = {};
@@ -16,7 +16,6 @@ static std::vector<int> CreateMemory(std::string file_name) {
   return memory;
 }
 
-
 struct Instruction {
   enum class GetMode { IMMEDIATE = 0, POSITION = 1 };
 
@@ -24,7 +23,6 @@ struct Instruction {
   std::vector<int> params;
   std::vector<GetMode> param_modes;
 };
-
 
 class Computer {
 public:
@@ -71,7 +69,7 @@ protected:
       instruction.param_modes.push_back(Instruction::GetMode::POSITION);
     }
 
-    return instruction; 
+    return instruction;
   }
 
   virtual bool ExecuteInstruction(const Instruction &instruction) {

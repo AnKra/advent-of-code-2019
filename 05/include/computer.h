@@ -3,7 +3,6 @@
 
 #include <day02/computer.h>
 
-
 class SuperComputer : public Computer {
 public:
   SuperComputer(std::vector<int> initial_registers, int input)
