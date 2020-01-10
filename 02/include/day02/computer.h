@@ -1,35 +1,25 @@
-#ifndef DAY_02_INCLUDE_SQALRE_H_
-#define DAY_02_INCLUDE_SQALRE_H_
+#ifndef DAY_02_INCLUDE_DAY02_COMPUTER_H_
+#define DAY_02_INCLUDE_DAY02_COMPUTER_H_
 
-#include <fstream>
+#include <memory>
+#include <utility>
 #include <vector>
 
-static std::vector<int> CreateMemory(std::string file_name) {
-  std::vector<int> memory = {};
+#include "day02/memory.h"
 
-  std::ifstream input_file(file_name);
-  std::string value_string;
-  while (std::getline(input_file, value_string, ',')) {
-    memory.push_back(std::stoi(value_string));
-  }
-
-  return memory;
-}
+namespace day02 {
 
 struct Instruction {
-  enum class GetMode { IMMEDIATE = 0, POSITION = 1 };
-
   int opcode;
-  std::vector<int> params;
-  std::vector<GetMode> param_modes;
+  std::vector<std::pair<int, Memory::Mode>> params;
 };
 
 class Computer {
 public:
   enum class Opcode { ADD = 1, MULTIPLY = 2 };
 
-  Computer(std::vector<int> initial_registers)
-      : memory_(initial_registers), instruction_ptr_(0) {}
+  explicit Computer(std::unique_ptr<Memory> memory)
+      : memory_(std::move(memory)), instruction_ptr_(0) {}
   virtual ~Computer() {}
 
   void Run() {
@@ -45,28 +35,19 @@ public:
   }
 
   void SetInput(int noun, int verb) {
-    Set(1, noun);
-    Set(2, verb);
+    memory_->Set(1, noun, Memory::Mode::IMMEDIATE);
+    memory_->Set(2, verb, Memory::Mode::IMMEDIATE);
   }
 
-  int Get(const int param, const Instruction::GetMode mode =
-                               Instruction::GetMode::IMMEDIATE) const {
-    if (mode == Instruction::GetMode::IMMEDIATE) {
-      return memory_[param];
-    } else {
-      return Computer::Get(memory_[param], Instruction::GetMode::IMMEDIATE);
-    }
-  }
+  int Get(const int param) const { return memory_->Get(param); }
 
 protected:
-  void Set(int address, int value) { memory_[address] = value; }
-
   virtual Instruction Decode(const int instruction_ptr) const {
-    Instruction instruction = {Get(instruction_ptr_), {}};
+    Instruction instruction = {memory_->Get(instruction_ptr_), {}};
 
     for (size_t i = 1; i <= 3; ++i) {
-      instruction.params.push_back(instruction_ptr_ + i);
-      instruction.param_modes.push_back(Instruction::GetMode::POSITION);
+      instruction.params.push_back(
+          std::make_pair(instruction_ptr_ + i, Memory::Mode::POSITION));
     }
 
     return instruction;
@@ -75,15 +56,15 @@ protected:
   virtual bool ExecuteInstruction(const Instruction &instruction) {
     switch (static_cast<Opcode>(instruction.opcode)) {
     case Opcode::ADD:
-      Set(Get(instruction.params[2]),
-          Get(instruction.params[0], instruction.param_modes[0]) +
-              Get(instruction.params[1], instruction.param_modes[1]));
+      memory_->Set(std::get<0>(instruction.params[2]),
+                   memory_->Get(instruction.params[0]) +
+                       memory_->Get(instruction.params[1]));
       instruction_ptr_ += 4;
       break;
     case Opcode::MULTIPLY:
-      Set(Get(instruction.params[2]),
-          Get(instruction.params[0], instruction.param_modes[0]) *
-              Get(instruction.params[1], instruction.param_modes[1]));
+      memory_->Set(std::get<0>(instruction.params[2]),
+                   memory_->Get(instruction.params[0]) *
+                       memory_->Get(instruction.params[1]));
       instruction_ptr_ += 4;
       break;
     default:
@@ -93,8 +74,10 @@ protected:
     return true;
   }
 
-  std::vector<int> memory_;
   int instruction_ptr_;
+  std::unique_ptr<Memory> memory_;
 };
 
-#endif
+} // namespace day02
+
+#endif // DAY_02_INCLUDE_DAY02_COMPUTER_H_
