@@ -79,16 +79,16 @@ protected:
   }
 
   day02::Instruction Decode(const int instruction_ptr) const override {
-    day02::Instruction instruction = {memory_->Get(instruction_ptr_), {}};
+    day02::Instruction instruction = {memory_->Get(instruction_ptr), {}};
 
     auto opcode_copy = instruction.opcode / 100;
     instruction.opcode = instruction.opcode % 100;
 
     for (size_t i = 1; i <= 3; ++i) {
       instruction.params.push_back(std::make_pair(
-          instruction_ptr_ + i, (opcode_copy % 10) == 1
-                                    ? day02::Memory::Mode::IMMEDIATE
-                                    : day02::Memory::Mode::POSITION));
+          instruction_ptr + i, (opcode_copy % 10) == 1
+                                   ? day02::Memory::Mode::IMMEDIATE
+                                   : day02::Memory::Mode::POSITION));
       opcode_copy /= 10;
     }
 

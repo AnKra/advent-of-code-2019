@@ -37,7 +37,6 @@ int main() {
       enum class State { NOT_SAME, DOUBLE, MULTIPLE };
       State state = State::NOT_SAME;
 
-      bool are_previous_two_digits_same = false;
       do {
         auto last_two_digits = number % 100;
         bool last_two_digits_are_same = (last_two_digits % 11 == 0);

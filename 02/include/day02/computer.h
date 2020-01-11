@@ -43,11 +43,11 @@ public:
 
 protected:
   virtual Instruction Decode(const int instruction_ptr) const {
-    Instruction instruction = {memory_->Get(instruction_ptr_), {}};
+    Instruction instruction = {memory_->Get(instruction_ptr), {}};
 
     for (size_t i = 1; i <= 3; ++i) {
       instruction.params.push_back(
-          std::make_pair(instruction_ptr_ + i, Memory::Mode::POSITION));
+          std::make_pair(instruction_ptr + i, Memory::Mode::POSITION));
     }
 
     return instruction;
@@ -74,8 +74,8 @@ protected:
     return true;
   }
 
-  int instruction_ptr_;
   std::unique_ptr<Memory> memory_;
+  int instruction_ptr_;
 };
 
 } // namespace day02

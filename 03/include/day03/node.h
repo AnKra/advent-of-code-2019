@@ -12,13 +12,13 @@ enum class Direction { UNKNOWN, VERTICAL, HORIZONTAL };
 class Node {
 public:
   explicit Node(Direction dir, Point p, int dist_orig)
-      : direction_(dir), point(p), distance_from_origin(dist_orig) {}
+      : point(p), distance_from_origin(dist_orig), direction_(dir) {}
 
   virtual ~Node(){};
 
-  static const Node *const GetNodeByDirection(const Direction direction,
-                                              const Node *const node1,
-                                              const Node *const node2) {
+  static const Node *GetNodeByDirection(const Direction direction,
+                                        const Node *const node1,
+                                        const Node *const node2) {
     return node1->next->direction_ == direction
                ? node1
                : node2->next->direction_ == direction ? node2 : nullptr;

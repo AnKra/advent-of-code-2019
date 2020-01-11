@@ -13,3 +13,5 @@ add_executable(${PROJECT_NAME}
 target_include_directories (${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../common/include
 )
+
+target_compile_options(${PROJECT_NAME}  PRIVATE -Werror -Wall -Wextra)
